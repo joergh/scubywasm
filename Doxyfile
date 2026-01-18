@@ -1,0 +1,59 @@
+# --- Project ---
+PROJECT_NAME           = "Scubywasm API"
+PROJECT_BRIEF          = "C ABI for WebAssembly agents and engine"
+
+# --- Build / output ---
+OUTPUT_DIRECTORY       = doc/build
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_OUTPUT            = html
+
+# --- Inputs ---
+# Only document the agent API header, plus the Markdown landing page.
+INPUT                  = agents/scubywasm_agent.h \
+                         engine/scubywasm_engine.h \
+                         doc/index.md
+FILE_PATTERNS          = *.h *.md
+RECURSIVE              = NO
+
+# Use the Markdown landing page as the main page.
+USE_MDFILE_AS_MAINPAGE = doc/index.md
+MARKDOWN_SUPPORT       = YES
+
+# Keep paths readable in generated pages.
+FULL_PATH_NAMES        = NO
+STRIP_FROM_PATH        = .
+
+# --- Extraction ---
+# Extract documented entities from the header.
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+
+# --- Formatting / navigation ---
+OPTIMIZE_OUTPUT_FOR_C  = YES
+JAVADOC_AUTOBRIEF      = YES
+INLINE_SIMPLE_STRUCTS  = YES
+SHOW_FILES             = YES
+GENERATE_TREEVIEW      = YES
+
+# --- Diagnostics ---
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+WARN_AS_ERROR          = NO
+QUIET                  = YES
+
+# --- Preprocessor ---
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = NO
+PREDEFINED             = FREESTANDING=1
+
+# Parse .h as C++ for better syntax support
+EXTENSION_MAPPING      = h=C++
+
+# --- Performance ---
+LOOKUP_CACHE_SIZE      = 0
+
+# --- Example path ---
+EXAMPLE_PATH           = agents
+EXAMPLE_RECURSIVE      = YES

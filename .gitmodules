@@ -1,0 +1,3 @@
+[submodule "agents/lua"]
+	path = agents/lua
+	url = https://github.com/lua/lua.git

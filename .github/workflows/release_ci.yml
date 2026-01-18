@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release-wasm:
+    name: Upload WASM release assets
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      TAG: ${{ github.ref_name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install WASI SDK
+        id: wasi-sdk
+        # TODO: Switch to a tagged release once the action publishes stable version tags.
+        uses: bytecodealliance/setup-wasi-sdk-action@main
+        with:
+          version: 29
+
+      - name: Build engine.wasm
+        working-directory: engine
+        run: make
+
+      - name: Build freestanding_agent.wasm
+        working-directory: agents
+        run: make WASI_SDK_PATH="${{ steps.wasi-sdk.outputs.wasi-sdk-path }}"
+
+      - name: Prepare release assets
+        run: |
+          set -e
+          mkdir -p dist
+
+          cp engine/build/engine.wasm dist/engine.wasm
+          cp agents/build/freestanding_agent.wasm dist/freestanding_agent.wasm
+          cp agents/build/lua_agent.wasm dist/lua_agent.wasm
+
+          sha256sum dist/engine.wasm > dist/engine.wasm.sha256
+          sha256sum dist/freestanding_agent.wasm > dist/freestanding_agent.wasm.sha256
+          sha256sum dist/lua_agent.wasm > dist/lua_agent.wasm.sha256
+
+          cat > dist/manifest.txt <<EOF
+          tag: ${TAG}
+          commit: ${GITHUB_SHA}
+          EOF
+
+      - name: Create release (if missing) and upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+
+          gh release view "${TAG}" >/dev/null 2>&1 || \
+            gh release create "${TAG}" --title "${TAG}" --notes "" --target "${GITHUB_SHA}"
+
+          gh release upload "${TAG}" \
+            dist/engine.wasm dist/engine.wasm.sha256 \
+            dist/freestanding_agent.wasm dist/freestanding_agent.wasm.sha256 \
+            dist/lua_agent.wasm dist/lua_agent.wasm.sha256 \
+            dist/manifest.txt \
+            --clobber
+
