@@ -5,7 +5,7 @@ This documentation covers the C-level APIs used by Scubywasm:
 - the **agent ABI** that a WebAssembly agent module must export, and
 - the **engine API** used by hosts/tools to run rounds and query game state.
 
-Game rules and project overview are documented in [README.md](https://github.com/avitase/scubywasm).
+Game rules and project overview are documented in [README.md](https://github.com/tondorf/scubywasm).
 
 ## Start here
 

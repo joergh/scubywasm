@@ -1,6 +1,6 @@
-[![Engine CI](https://github.com/avitase/scubywasm/actions/workflows/engine_ci.yml/badge.svg)](https://github.com/avitase/scubywasm/actions/workflows/engine_ci.yml)
-[![Agents CI](https://github.com/avitase/scubywasm/actions/workflows/agents_ci.yml/badge.svg)](https://github.com/avitase/scubywasm/actions/workflows/agents_ci.yml)
-[![codecov](https://codecov.io/gh/avitase/scubywasm/graph/badge.svg?token=BHHBQK7596)](https://codecov.io/gh/avitase/scubywasm)
+[![Engine CI](https://github.com/tondorf/scubywasm/actions/workflows/engine_ci.yml/badge.svg)](https://github.com/tondorf/scubywasm/actions/workflows/engine_ci.yml)
+[![Agents CI](https://github.com/tondorf/scubywasm/actions/workflows/agents_ci.yml/badge.svg)](https://github.com/tondorf/scubywasm/actions/workflows/agents_ci.yml)
+[![codecov](https://codecov.io/gh/tondorf/scubywasm/graph/badge.svg?token=BHHBQK7596)](https://codecov.io/gh/tondorf/scubywasm)
 
 # Scubywasm
 Scubywasm is the rightful heir and modern reincarnation of the infamous [Scubywars](https://github.com/SuperTux88/scubywars.kernel) - this time with [WebAssembly (WASM)](https://webassembly.org/) because this is definitely a good idea.
@@ -11,13 +11,13 @@ Scubywasm is (certainly a good idea and) a game engine than runs bots, aka _agen
 > **Shortcut for `tools/` users:** you do not have to compile WASM locally just to try the Python tooling.
 >
 > **Latest builds (from `main`, published on the docs page):**
-> - [`engine.wasm`](https://avitase.github.io/scubywasm/downloads/latest/engine.wasm)
->   - [sha256](https://avitase.github.io/scubywasm/downloads/latest/engine.wasm.sha256)
-> - [`freestanding_agent.wasm`](https://avitase.github.io/scubywasm/downloads/latest/freestanding_agent.wasm)
->   - [sha256](https://avitase.github.io/scubywasm/downloads/latest/freestanding_agent.wasm.sha256)
-> - [build info (manifest.txt)](https://avitase.github.io/scubywasm/downloads/latest/manifest.txt)
+> - [`engine.wasm`](https://tondorf.github.io/scubywasm/downloads/latest/engine.wasm)
+>   - [sha256](https://tondorf.github.io/scubywasm/downloads/latest/engine.wasm.sha256)
+> - [`freestanding_agent.wasm`](https://tondorf.github.io/scubywasm/downloads/latest/freestanding_agent.wasm)
+>   - [sha256](https://tondorf.github.io/scubywasm/downloads/latest/freestanding_agent.wasm.sha256)
+> - [build info (manifest.txt)](https://tondorf.github.io/scubywasm/downloads/latest/manifest.txt)
 >
-> Prefer stable, versioned files? Grab the same assets from [GitHub Releases](https://github.com/avitase/scubywasm/releases/latest).
+> Prefer stable, versioned files? Grab the same assets from [GitHub Releases](https://github.com/tondorf/scubywasm/releases/latest).
 
 ## Scubywasm's 3-Point Manifesto
 Ship the bot, not the moves. In Scubywasm you submit the entire agent program, not a stream of actions.
@@ -48,7 +48,7 @@ Please feel free to reverse engineer further rules from our [game engine impleme
 
 ## How to write bots/agents?
 Implementing your own agent is simple once you've figured out how to compile your favorite programming language into a WASM module.
-See [agents/freestanding_agent.c](agents/freestanding_agent.c) for an example of a very simple valid agent that implements the required [API](https://avitase.github.io/scubywasm/).
+See [agents/freestanding_agent.c](agents/freestanding_agent.c) for an example of a very simple valid agent that implements the required [API](https://tondorf.github.io/scubywasm/).
 
 🤫 **Secret side quest:** I also built a small Lua proof-of-concept, mainly to convince myself that this works and as a nice integration test that the [WASI](https://wasi.dev/) setup is sane; not because I think that this is the best way to build agents.
 Concretely: I embedded the Lua VM/runtime *and* the Lua agent code from [agents/lua_agent.lua](agents/lua_agent.lua) into a C file and compiled the whole thing to WASM.
