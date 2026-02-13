@@ -13,8 +13,8 @@ def fuel_guard(fn):
 
         try:
             return fn(self, *args, **kwargs)
-        except Exception:
-            logger.info("Filthy agent misbehaved and is now trapped")
+        except Exception as e:
+            logger.info("Filthy agent misbehaved and is now trapped: %s", e)
             self._trapped = True
             return None
 
