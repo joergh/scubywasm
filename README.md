@@ -54,6 +54,27 @@ See [agents/freestanding_agent.c](agents/freestanding_agent.c) for an example of
 Concretely: I embedded the Lua VM/runtime *and* the Lua agent code from [agents/lua_agent.lua](agents/lua_agent.lua) into a C file and compiled the whole thing to WASM.
 The result is [agents/lua_agent.c](agents/lua_agent.c), a Lua agent, embedded, interpreted and run in C, compiled to WASM, executed by Wasmtime (written in Rust), and orchestrated from Python (using the `scubywasm-run`, see below) 🤯 - a working (!) agent module with a binary size of <250kB.
 
+Building the included **freestanding C reference agent** (i.e., without WASI) is intentionally boring:
+just run `make` in `agents/`,
+
+```bash
+cd scubywasm/agents
+make 
+```
+
+and you'll get a working `freestanding_agent.wasm` under `agents/build/`.
+Optionally, we also ship a small Lua-based agent; that one currently requires [WASI](https://wasi.dev/).
+(In theory, the Lua setup could be made freestanding as well, but this is not implemented yet.)
+We bundle the Lua sources as an (optional) Git submodule under `agents/lua`, hence make sure you clone this repository with submodules and manually install the [WASI SDK](https://github.com/WebAssembly/wasi-sdk).
+To build *both* the freestanding C agent and the Lua agent, run:
+
+```bash
+cd scubywasm/agents
+make WASI_SDK_PATH=<PATH/TO/WASI-SDK/build/install>
+```
+
+If everything succeeds, you'll find the compiled modules in `agents/build/` as `freestanding_agent.wasm` and `lua_agent.wasm`.
+
 ## How to run a server?
 The stuff under [engine/](engine/) is serious craftsmanship that we are proud of... not such much the scripts under [tools/](tools/).
 Still, if you are in desperate need of, e.g., a simple server or a replay viewer, please don't hesitate to use and (to help us) to improve them.
