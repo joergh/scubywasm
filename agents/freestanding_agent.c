@@ -9,7 +9,7 @@ extern "C"
 #endif
 
 __attribute__((import_module("debug"), import_name("debug_log"))) void
-_dbg(uint32_t ptr, uint32_t len);
+host_debug_log(uint32_t ptr, uint32_t len);
 
 static void log(const char *s)
 {
@@ -19,7 +19,7 @@ static void log(const char *s)
         n++;
     }
 
-    _dbg((uint32_t)(uintptr_t)s, n);
+    host_debug_log((uint32_t)(uintptr_t)s, n);
 }
 
 struct Context *init_agent(uint32_t /*n_agents*/,
