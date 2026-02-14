@@ -37,7 +37,9 @@ class Logger:
             print(f"Saved game log to {log_file!s}")
 
 
-def _run_game(*, engine_wasm, agents_dir, agent_multiplicity, seed, max_ticks):
+def _run_game(
+    *, engine_wasm, agents_dir, agent_multiplicity, seed, max_ticks, agent_fuel_limit
+):
     agent_wasmfiles = []
     pattern = re.compile(r"^agent-v(\d+)\.wasm$")
     for d in agents_dir.iterdir():
@@ -191,7 +193,7 @@ def main():
     if args.multiplicity < 1:
         parser.error(f"--multiplicity must be >= 1 (got {args.multiplicity})")
 
-    if args.fuel_limit < 100:
+    if args.fuel_limit and args.fuel_limit < 100:
         parser.error(f"--multiplicity must be >= 100 (got {args.fuel_limit})")
 
     if args.max_ticks < 1:
