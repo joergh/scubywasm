@@ -19,6 +19,12 @@ class WASMModule:
         )
         self._memory = self._instance.exports(self._store)["memory"]
 
+        exports = self._instance.exports(self._store)
+        if "_initialize" in exports:
+            exports["_initialize"](store)
+        elif "__wasm_call_ctors" in exports:
+            exports["__wasm_call_ctors"](store)
+
     def __getattr__(self, name):
         exports = self._instance.exports(self._store)
 
