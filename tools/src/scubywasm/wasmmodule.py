@@ -13,6 +13,10 @@ class WASMModule:
             self._store.set_wasi(wasmtime.WasiConfig())
             linker.define_wasi()
 
+        # Attach a callback function for dumping debug logs to the console:
+        dbg = wasmtime.Func(store, wasmtime.FuncType([wasmtime.ValType.i32(), wasmtime.ValType.i32()], []), self.debug_log)
+        linker.define(store, "debug", "debug_log", dbg)
+
         self._instance = linker.instantiate(
             self._store,
             wasmtime.Module(self._store.engine, wasm),
@@ -49,3 +53,8 @@ class WASMModule:
 
     def write_struct(self, fmt, ptr, *values):
         self._memory.write(self._store, struct.pack(fmt, *values), ptr)
+
+    def debug_log(self, start, length):
+        # We cannot pass strings or complex types directly, so we need to fetch it directly from the modules memory:
+        ba = self._memory.read(self._store, start, start+length)
+        print("[wasmdbg] " + ba.decode())
