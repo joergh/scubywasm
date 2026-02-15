@@ -161,7 +161,6 @@ def main():
             screen.fill((15, 15, 18))
 
             for i, team in enumerate(log):
-
                 for shot in team["shots"].values():
                     if shot["lifetime"][tick] > 0:
                         draw_shot(
