@@ -7,6 +7,7 @@ import pathlib
 import signal
 import tempfile
 import concurrent.futures as cf
+from time import sleep
 from .server import Logger
 from .game import Game
 
@@ -71,6 +72,10 @@ class Scenario:
 
     def run(self):
         agents = self.gather_agents()
+        if not agents:
+            print(f"Warning: no agents found for scenario '{self.name}', sleeping...")
+            sleep(5)
+            return self
         if self.need_restart(agents):
             self.agents = agents
             self.result_dir = RESULTS_DIR / self.name / datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
