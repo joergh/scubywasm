@@ -54,7 +54,8 @@ class Scenario:
         agents=[]
         for agent_file, user in agent_files.values():
             dest_file = self.result_dir / f"{user}-{agent_file.parent.name}-{agent_file.stem}.wasm"
-            dest_file.write_bytes(agent_file.read_bytes())
+            if not dest_file.exists():
+                dest_file.write_bytes(agent_file.read_bytes())
             agents.append(dest_file)
         agent_wasms = [file_name.read_bytes() for file_name in agents]
 
@@ -89,6 +90,7 @@ class Scenario:
             self.agents = agents
             self.result_dir = RESULTS_DIR / self.name / datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
             self.result_dir.mkdir(parents=True, exist_ok=True)
+
         elif self.round >= self.max_rounds:
             if not self.notified:
                 print(f"Reached max rounds for scenario '{self.name}', sleeping...")
