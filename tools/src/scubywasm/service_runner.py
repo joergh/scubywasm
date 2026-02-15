@@ -15,22 +15,25 @@ RESULTS_DIR = None
 ENGINE_WASM = None
 
 class Scenario:
-    def __init__(self, name, multiplicity=1, max_ticks=1000, fuel_limit=1000):
+    def __init__(self, name, multiplicity=1, max_ticks=1000, fuel_limit=1000, max_rounds=100):
         self.name = name
         self.multiplicity = multiplicity
         self.max_ticks = max_ticks
         self.fuel_limit = fuel_limit
+        self.max_rounds = max_rounds
         self.agents = {}
-        self.seed=42
+        self.round = 0
+        self.seed = 42
+        self.notified = False
         self.result_dir = None
 
     def gather_agents(self):
         agents = {}
-        for user_dir in pathlib.Path("/home").glob("*/agents/*"):
-            if user_dir.is_dir():
+        for user_dir in pathlib.Path("/home").glob("*"):
+            if user_dir.is_dir():   
                 user = user_dir.stem
-                for agent_file in user_dir.glob("*.wasm"):
-                    agent_name = agent_file.stem
+                for agent_file in user_dir.glob("agents/*/*.wasm"):
+                    agent_name = agent_file.parent.stem
                     if agent_name not in agents or agent_file.stat().st_mtime > agents[agent_name][1]:
                         agents[agent_name] =  (agent_file, agent_file.stat().st_mtime, agent_file.stat().st_size, user)
         return agents
@@ -74,15 +77,27 @@ class Scenario:
     def run(self):
         agents = self.gather_agents()
         if not agents or len(agents) == 0:
+            self.round = 0
             self.agents = {}
-            print(f"Warning: no agents found for scenario '{self.name}', sleeping...")
+            if not self.notified:
+                print(f"Warning: no agents found for scenario '{self.name}', sleeping...")
+                self.notified = True
             sleep(5)
             return self
         if self.need_restart(agents) or self.result_dir is None:
+            self.round = 0
             self.agents = agents
             self.result_dir = RESULTS_DIR / self.name / datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
             self.result_dir.mkdir(parents=True, exist_ok=True)
+        elif self.round >= self.max_rounds:
+            if not self.notified:
+                print(f"Reached max rounds for scenario '{self.name}', sleeping...")
+                self.notified = True
+            sleep(5)
+            return self
+        self.notified = False
         self.run_game()
+        self.round += 1
         return self
     
 SCENARIO_KEYS = [("name", str),
@@ -122,6 +137,7 @@ def _read_scenarios(scenario_file):
             scenario["multiplicity"],
             scenario["max_ticks"],
             scenario["fuel_limit"],
+            scenario["max_rounds"]
         )
     
     return scenarios
