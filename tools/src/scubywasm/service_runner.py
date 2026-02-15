@@ -74,6 +74,7 @@ class Scenario:
     def run(self):
         agents = self.gather_agents()
         if not agents or len(agents) == 0:
+            self.agents = {}
             print(f"Warning: no agents found for scenario '{self.name}', sleeping...")
             sleep(5)
             return self
