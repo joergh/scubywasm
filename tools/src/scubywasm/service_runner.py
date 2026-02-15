@@ -58,7 +58,7 @@ class Scenario:
         logger = Logger(self.result_dir, verbose=True)
 
         game = Game(
-            ENGINE_WASM.read_bytes(), agent_wasms, seed=self.seed, agent_multiplicity=self.multiplicity
+            ENGINE_WASM.read_bytes(), agent_wasms, seed=self.seed, agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit
         )
 
         for _ in range(self.max_ticks):
