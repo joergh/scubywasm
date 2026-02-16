@@ -5,15 +5,78 @@ import json
 import os
 import pathlib
 import random
+import re
 import signal
 import tempfile
 import concurrent.futures as cf
 from time import sleep
-from .server import Logger
 from .game import Game
 
 RESULTS_DIR = None
 ENGINE_WASM = None
+
+class Logger:
+    def __init__(self, log_dir, *, max_logs, verbose):
+        self._verbose = verbose
+        self._max_logs = max_logs
+        self._log_dir = log_dir
+        self._pattern = re.compile(r"^scubywasm-log_(\d+)\.json$")
+
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        logs = self._get_logs()
+        largest = max(
+            logs, key=lambda item: item[0], default=None
+        )
+        self._idx = (
+            0 if largest is None else largest[0] + 1
+        )
+        self._prune_logs()
+
+    def _get_logs(self):
+        logs = []
+        for path in self._log_dir.glob("*.json"):
+            match = self._pattern.match(path.name)
+            if not match:
+                continue
+            try:
+                index = int(match.group(1))
+            except ValueError:
+                continue
+            logs.append((index, path))
+        return sorted(logs, key=lambda item: item[0])
+
+    def _prune_logs(self):
+        if self._max_logs is None:
+            return
+        logs = self._get_logs()
+        if self._max_logs <= 0:
+            for _, path in logs:
+                try:
+                    path.unlink()
+                except FileNotFoundError:
+                    pass
+            return
+        excess = len(logs) - self._max_logs
+        if excess <= 0:
+            return
+        for _, path in logs[:excess]:
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+
+    def save_log(self, log):
+        log_file = self._log_dir / f"scubywasm-log_{self._idx}.json"
+        with log_file.open("w") as f:
+            json.dump(log, f)
+            f.write("\n")
+
+        self._idx += 1
+        self._prune_logs()
+
+        if self._verbose:
+            print(f"Saved game log to {log_file!s}")
 
 class Scenario:
     def __init__(self, name, multiplicity=1, max_ticks=1000, fuel_limit=1000, max_rounds=100):
@@ -59,7 +122,7 @@ class Scenario:
             agents.append(dest_file)
         agent_wasms = [file_name.read_bytes() for file_name in agents]
 
-        logger = Logger(self.result_dir, verbose=True)
+        logger = Logger(self.result_dir, max_logs=self.max_rounds,verbose=True)
 
         game = Game(
             ENGINE_WASM.read_bytes(), agent_wasms, seed=random.randint(0, 2**32 - 1), agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit
@@ -91,12 +154,13 @@ class Scenario:
             self.result_dir = RESULTS_DIR / self.name / datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
             self.result_dir.mkdir(parents=True, exist_ok=True)
 
-        elif self.round >= self.max_rounds:
-            if not self.notified:
-                print(f"Reached max rounds for scenario '{self.name}', sleeping...")
-                self.notified = True
-            sleep(5)
-            return self
+        #elif self.round >= self.max_rounds:
+        #    if not self.notified:
+        #        print(f"Reached max rounds for scenario '{self.name}', sleeping...")
+        #        self.notified = True
+        #    sleep(5)
+        #    return self
+        
         self.notified = False
         self.run_game()
         self.round += 1
