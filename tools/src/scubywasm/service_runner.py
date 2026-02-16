@@ -1,16 +1,20 @@
 import argparse
+import dataclasses
 import datetime
 import errno
+import inspect
 import json
 import os
 import pathlib
 import random
 import re
 import signal
+import sys
 import tempfile
 import concurrent.futures as cf
 from time import sleep
 from .game import Game
+from .common import Config as EngineConfig
 
 RESULTS_DIR = None
 ENGINE_WASM = None
@@ -79,7 +83,7 @@ class Logger:
             print(f"Saved game log to {log_file!s}")
 
 class Scenario:
-    def __init__(self, name, multiplicity=1, max_ticks=1000, fuel_limit=1000, max_rounds=100):
+    def __init__(self, name, multiplicity=1, max_ticks=1000, fuel_limit=1000, max_rounds=100, engine_cfg=None):
         self.name = name
         self.multiplicity = multiplicity
         self.max_ticks = max_ticks
@@ -89,7 +93,8 @@ class Scenario:
         self.round = 0
         self.notified = False
         self.result_dir = None
-
+        self.engine_cfg = engine_cfg
+        
     def gather_agents(self):
         agents = {}
         for user_dir in pathlib.Path("/home").glob("*"):
@@ -122,10 +127,10 @@ class Scenario:
             agents.append(dest_file)
         agent_wasms = [file_name.read_bytes() for file_name in agents]
 
-        logger = Logger(self.result_dir, max_logs=self.max_rounds,verbose=True)
+        logger = Logger(self.result_dir, max_logs=self.max_rounds,verbose=False)
 
         game = Game(
-            ENGINE_WASM.read_bytes(), agent_wasms, seed=random.randint(0, 2**32 - 1), agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit
+            ENGINE_WASM.read_bytes(), agent_wasms, seed=random.randint(0, 2**32 - 1), agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit, engine_cfg=self.engine_cfg
         )
 
         for _ in range(self.max_ticks):
@@ -188,6 +193,10 @@ def _validate_scenario(scenario, index):
                 f"scenario '{scenario['name']}' must have integer '{key}'"
             )
 
+def _get_engineconfig_keys():
+    members = dict(inspect.getmembers(EngineConfig))
+    return [field.name for field in list(dict(members)['__dataclass_fields__'].values()) ]
+
 def _read_scenarios(scenario_file):
     if not os.path.exists(scenario_file):
         raise FileNotFoundError(f"scenario file {scenario_file!s} does not exist")
@@ -203,12 +212,16 @@ def _read_scenarios(scenario_file):
             scenario["multiplicity"],
             scenario["max_ticks"],
             scenario["fuel_limit"],
-            scenario["max_rounds"]
+            scenario["max_rounds"],
+            engine_cfg=EngineConfig(**{key: scenario[key] for key in _get_engineconfig_keys()})
         )
     
     return scenarios
 
 def main():
+    sys.stdout.reconfigure(line_buffering=True)
+    
+    
     parser = argparse.ArgumentParser(
         prog="scubywasm-service-runner",
         formatter_class=argparse.RawDescriptionHelpFormatter,
