@@ -4,7 +4,7 @@ import errno
 import json
 import os
 import pathlib
-from random import random
+import random
 import signal
 import tempfile
 import concurrent.futures as cf
