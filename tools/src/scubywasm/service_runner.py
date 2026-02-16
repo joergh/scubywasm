@@ -24,7 +24,6 @@ class Scenario:
         self.max_rounds = max_rounds
         self.agents = {}
         self.round = 0
-        self.seed = random.randint(0, 2**32 - 1)
         self.notified = False
         self.result_dir = None
 
@@ -63,7 +62,7 @@ class Scenario:
         logger = Logger(self.result_dir, verbose=True)
 
         game = Game(
-            ENGINE_WASM.read_bytes(), agent_wasms, seed=self.seed, agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit
+            ENGINE_WASM.read_bytes(), agent_wasms, seed=random.randint(0, 2**32 - 1), agent_multiplicity=self.multiplicity, agent_fuel_limit=self.fuel_limit
         )
 
         for _ in range(self.max_ticks):
